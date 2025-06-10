@@ -47,7 +47,8 @@
       data-bs-target="#navbarNavAltMarkup"
       aria-controls="navbarNavAltMarkup" 
       aria-expanded="false" 
-      aria-label="Toggle navigation">
+      aria-label="Toggle navigation"
+    >
       <span class="navbar-toggler-icon"></span>
     </button>
 
@@ -61,8 +62,14 @@
 
       <!-- Search Bar -->
       <div class="navbar-nav mx-auto">
-        <form class="d-flex" role="search">
-          <input class="form-control me-2 search-inp" type="search" placeholder="Search destinations" aria-label="Search" />
+        <form class="d-flex" role="search" action="/listings" method="GET">
+          <input
+            class="form-control me-2 search-inp"
+            type="search"
+            name="search"
+            placeholder="Search destinations"
+            aria-label="Search"
+          />
           <button class="btn search-btn" type="submit">
             <i class="fa-solid fa-magnifying-glass"></i> Search
           </button>
@@ -74,13 +81,33 @@
         <a class="nav-link text-black" href="/listings/new">Airbnb your home</a>
 
         <% if (!currUser) { %>
+          <!-- If user is NOT logged in -->
           <a class="nav-link text-black" href="/signup"><b>Sign Up</b></a>
           <a class="nav-link text-black" href="/login"><b>Log in</b></a>
         <% } else { %>
-          <a class="nav-link text-black" href="/logout"><b>Log out</b></a>
+          <!-- If user IS logged in -->
+          <div class="nav-item dropdown">
+            <a 
+              class="nav-link dropdown-toggle text-black" 
+              href="#" 
+              id="userDropdown" 
+              role="button" 
+              data-bs-toggle="dropdown" 
+              aria-expanded="false"
+            >
+              <i class="fa-solid fa-user"></i> <%= currUser.username %>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+              <li><a class="dropdown-item" href="/profile">Profile</a></li>
+              <li><a class="dropdown-item" href="/listings/new">Add New Listing</a></li>
+              <li><hr class="dropdown-divider" /></li>
+              <li><a class="dropdown-item text-danger" href="/logout">Log out</a></li>
+            </ul>
+          </div>
         <% } %>
       </div>
 
     </div>
   </div>
 </nav>
+

@@ -10,7 +10,7 @@ const path = require("path");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const session = require("express-session");
-const MongoStore = require('connect-mongo');
+const MongoStore = require("connect-mongo");
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
@@ -26,7 +26,7 @@ const userRoutes = require("./routes/user");
 const app = express();
 
 // Secure MongoDB connection string from .env
-const dbUrl = process.env.ATLASDB_URL || "mongodb://127.0.0.1:27017/wanderlust"; // Fallback for local MongoDB
+const dbUrl = process.env.ATLASDB_URL || "mongodb://127.0.0.1:27017/wanderlust"; // Fallback to local MongoDB
 
 // Connect to MongoDB Atlas
 mongoose
@@ -52,23 +52,23 @@ app.use(express.json()); // Parse JSON payloads
 app.use(methodOverride("_method")); // Support PUT & DELETE requests
 app.use(express.static(path.join(__dirname, "public"))); // Serve static files
 
+// MongoDB session store setup
 const store = MongoStore.create({
   mongoUrl: dbUrl,
   crypto: {
-    secret: process.env.SECRET,
-
+    secret: process.env.SESSION_SECRET || "thisshouldbeabettersecret",
   },
-  touchAfter: 24 * 3600,
+  touchAfter: 24 * 3600, // Session will not be updated more than once in 24 hours
 });
 
-store.on("error",()=>{
-  console.log("ERROR in MONGO SESSION STORE",err);
+store.on("error", (err) => {
+  console.log("❌ Error in MongoDB session store:", err);
 });
 
 // Session configuration
 const sessionOptions = {
   store,
-  secret: process.env.SESSION_SECRET , // Use an environment variable for production
+  secret: process.env.SESSION_SECRET || "this should be a better secret", // Fallback if env variable is missing
   resave: false,
   saveUninitialized: true,
   cookie: {
@@ -77,6 +77,7 @@ const sessionOptions = {
     httpOnly: true, // Helps prevent XSS attacks
   },
 };
+
 app.use(session(sessionOptions));
 app.use(flash());
 
@@ -87,11 +88,11 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-// Flash messages middleware
+// Flash and current user middleware
 app.use((req, res, next) => {
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
-  res.locals.currUser = req.user; // Make current user available in views
+  res.locals.currUser = req.user; // Make currUser available in views
   next();
 });
 
@@ -132,6 +133,7 @@ const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
+
 
 
 
